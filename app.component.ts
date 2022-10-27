@@ -31,7 +31,9 @@ export class AppComponent implements OnInit {
   downloadUrl!: any;
   stream!: any;
   videoBuffer!: any;
-  button! : any
+  downloadBtn!: any;
+  
+  
  
 
   constructor() {}
@@ -172,6 +174,30 @@ export class AppComponent implements OnInit {
     }
   }
 
+  download(){
+    let url = this.downloadUrl 
+    this.downloadBtn = document.getElementById("downloadButton");
+
+    try{
+      console.log("download working")
+      const aTag = document.createElement("a");
+
+        aTag.href = url;
+
+        aTag.download = url.replace(/^.*[\\\/]/, '');
+
+        document.body.appendChild(aTag);
+
+        aTag.click();
+
+        this.downloadBtn.innerText = "File Downloaded";
+      
+    }
+    catch{
+      console.log("Cant Download")
+    }
+
+  }
   
   
   onStopRecordingEvent() {
