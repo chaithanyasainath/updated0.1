@@ -2,6 +2,23 @@
 
 <!-- <canvas id="canvas"></canvas> -->
 <body>
-    <video id="video" autoplay width="460" height="380"></video>
-    <canvas id='canv'></canvas>
+    <!-- <video id="video" autoplay width="460" height="380"></video> -->
+        <canvas id='canv'></canvas>
+        <video id="video" autoplay width="460" height="380" #video  ></video>
+        <!-- <video class="video" #video autoplay controls></video> -->
+        
+        <span class="m-1"></span>
+        <!-- downloaded -->
+        <video id="video" style="width:360 !important;" controls #recordedVideo></video>
+
+        <!-- <button class="btn btn-primary btn-lg" style="width:360 !important;" src controls #recordedVideo (click)="createObjectURL">down</button> -->
+        <br>
+        <button class="btn btn-primary btn-lg" *ngIf="!isRecording" (click)="startRecording()">Start Recording</button>
+        <button class="btn btn-warning btn-lg" *ngIf="isRecording" (click)="stopRecording()">Stop Recording</button>
+        <a href ="this.button()">downloadUrl</a>
+        <button class="btn btn-primary btn-lg" id="video" (click)="this.button()">down</button>
+
+        <!-- <video _ngcontent-tvj-c44="" id="video" controls="" style="width: 360 !important;" src="blob:http://localhost:4200/acb8bdbd-393c-4f23-a310-15e39f6443b7"></video> -->
+    
 </body>
+
