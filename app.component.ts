@@ -1,7 +1,6 @@
 import { Component, VERSION, OnInit,ViewChild,ElementRef} from '@angular/core';
 import '@tensorflow/tfjs-backend-webgl';
 import * as blazeface from '@tensorflow-models/blazeface';
-import { angularMath } from 'angular-ts-math/dist/angular-ts-math/angular-ts-math';
 
 declare var MediaRecorder: any;
 
@@ -32,6 +31,14 @@ export class AppComponent implements OnInit {
   stream!: any;
   videoBuffer!: any;
   downloadBtn!: any;
+  preview : any;
+  canvas: any;
+  retake: any;
+  stoping:any;
+  starting:any;
+  id: any;
+  status!:any;
+  overlay!:any;
   
   
  
@@ -62,7 +69,7 @@ export class AppComponent implements OnInit {
         width: 360
       }
     })
-    .then(stream => {
+    .then((stream) => {
       this.videoElement = this.videoElementRef.nativeElement;
       this.recordVideoElement = this.recordVideoElementRef.nativeElement;
 
@@ -74,17 +81,21 @@ export class AppComponent implements OnInit {
     this.setupCamera();
     this.predictFace();
     
-    this.video = document.getElementById('video');
-    this.can = document.getElementById('canv');
-    this.ctx = this.can.getContext("2d");
-    this.ctx.rect(155,40,70,80);
-    //this.ctx.ellipse(100, 100, 50, 70, 0, 0, angularMath.getPi() * 2);
-    this.ctx.stroke();
+    // this.video = document.getElementById('video');
+    // this.can = document.getElementById('canvas');
+    // this.ctx = this.can.getContext("2d");
+    // this.ctx.rect(155,40,70,80);
+    // //this.ctx.ellipse(100, 100, 50, 70, 0, 0, angularMath.getPi() * 2);
+    // this.ctx.stroke();
     //this.can.drawImage(this.video ,150 ,150 , 50 , 50);
-
+    this.video = document.getElementById("video");
+    this.overlay = document.getElementById('inner-overlay');
+    
 
     
   }
+  
+
   setupCamera() {
 
     navigator.mediaDevices
@@ -108,33 +119,73 @@ export class AppComponent implements OnInit {
         }
       });
   }
+  // async predictFace() {
+    
+  //   const model = await blazeface.load();
+  //   console.log('Model Loaded');
+  //   setInterval(async () => {
+  //     const predictions = model.estimateFaces(this.video);
+  //     // if (predictions[0]['probability'][0] > 0.99) {
+
+  //     //   console.log('face found');
+  //     // }
+  //     // else {
+  //     //   console.log('face not found');
+  //     // }
+
+                
+  //     if ((await predictions).length > 0) {
+  //       for (let i = 0; i < (await predictions).length; i++) {
+  //         console.log((await predictions));
+  //       }
+  //     }
+
+  //   }, 1000);
+  // }
   async predictFace() {
     
     const model = await blazeface.load();
     console.log('Model Loaded');
     setInterval(async () => {
-      const predictions = model.estimateFaces(this.video);
-      // if (predictions[0]['probability'][0] > 0.99) {
+      let predictions = model.estimateFaces(this.video);
 
-      //   console.log('face found');
-      // }
-      // else {
-      //   console.log('face not found');
-      // }
-
-                
-      if ((await predictions).length > 0) {
-        for (let i = 0; i < (await predictions).length; i++) {
-          console.log((await predictions));
+      let faceCoordinates = await(predictions);    
+      if (faceCoordinates.length > 0) {
+        for (let i = 0; i < faceCoordinates.length; i++) {
+          console.log((faceCoordinates));
+          
         }
-      }
+      
+        let faceCoord_topLeft = faceCoordinates[0].topLeft
+        let faceCoord_bottomRight = faceCoordinates[0].bottomRight;
+               const canvas_coord_start = [110, 100];
+     
+        const canvas_coord_end = [510, 400];
+      let status = document.getElementById('status')
+        if (faceCoord_topLeft[0] >= canvas_coord_start[0] && faceCoord_topLeft[1]>= canvas_coord_start[1] && faceCoord_bottomRight[0] <= canvas_coord_end[0] && faceCoord_bottomRight[1] <= canvas_coord_end[1]) {
+          
+          console.log('INSIDE')
+          this.overlay.style.border = "6px solid green"
+          
+        }
+        else {
+         
+          this.overlay.style.border = "6px solid red"
+          console.log('OUTSIDE')
+        }
+    
+    
+      // }
+    }
 
-    }, 1000);
+      
+    }, 100);
   }
   
   startRecording() {
     this.recordedBlobs = [];
     let options: any = { mimeType: 'video/webm' };
+    
 
     try {
       this.mediaRecorder = new MediaRecorder(this.stream, options);
@@ -146,9 +197,34 @@ export class AppComponent implements OnInit {
     this.isRecording = !this.isRecording;
     this.onDataAvailableEvent();
     this.onStopRecordingEvent();
+    
+    
+    this.id = setInterval(() => {
+      this.ngOnDestroy()
+    }, 16000);
+  }
+  
+  ngOnDestroy() {
+    if (this.id) {
+      clearInterval(this.id);      
+      this.stopRecording();
+    }
   }
 
+    
+  
+
+  
+  
   stopRecording() {
+    this.video=document.getElementById("video");
+    this.video.style.display ='none'
+    this.overlay=document.getElementById("overlay");
+    this.overlay.style.display = 'none'
+    this.preview=document.getElementById("preview");
+    this.preview.style.display ='block'
+    
+
     this.mediaRecorder.stop();
     this.isRecording = !this.isRecording;
     console.log('Recorded Blobs: ', this.recordedBlobs);
@@ -190,7 +266,7 @@ export class AppComponent implements OnInit {
 
         aTag.click();
 
-        this.downloadBtn.innerText = "File Downloaded";
+        // this.downloadBtn.innerText = "File Downloaded";
       
     }
     catch{
@@ -198,7 +274,15 @@ export class AppComponent implements OnInit {
     }
 
   }
-  
+  retakeButton(){
+    
+    this.video.style.display ='block'
+    
+    this.preview.style.display ='none'
+
+    this.overlay.style.display ='block'
+}
+
   
   onStopRecordingEvent() {
     try {
